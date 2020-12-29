@@ -20,12 +20,18 @@ namespace CRUD_ComboBox
 
         private void BtnGuardar_Click(object sender, EventArgs e)
         {
+            try
+            {
+
+            
             String codigo = txtCodigo.Text;
             String nombre = txtNombre.Text;
             String descripcion = txtDescripcion.Text;
             Double precio_publico = Double.Parse(txtPrecioPublico.Text);
             int existencias = int.Parse(txtExistencias.Text);
 
+                if (codigo!=""&& nombre!=""&& descripcion!="" && precio_publico> 0 && existencias>0)
+                {
             String sql = "INSERT INTO productos (codigo, nombre, descripcion, precio_publico, existencias)" +
                 "VALUES ('"+codigo+ "','" + nombre + "','" + descripcion + "','" + precio_publico + "','" + existencias + "')";
 
@@ -41,14 +47,22 @@ namespace CRUD_ComboBox
             }
             catch (Exception ex)
             {
-
                 MessageBox.Show("error al guardar archivo" + ex.Message);
-
             }
 
-            finally
+                finally
+                {
+                    conexionBD.Close();
+                }
+
+            } else {
+                    MessageBox.Show("debe completar todos los campos");
+                   }
+            } 
+
+            catch (FormatException fex)
             {
-                conexionBD.Close();
+                MessageBox.Show("datos incorrectos: " + fex.Message);
             }
 
         }
