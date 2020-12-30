@@ -16,10 +16,14 @@ namespace CRUD_ComboBox
         public Form1()
         {
             InitializeComponent();
+            cargarCategorias();
         }
 
         private void BtnGuardar_Click(object sender, EventArgs e)
         {
+            //identificar que selecciona el usuario en el combobox selectedValue trae el valor del id que selecciono
+            int idCategoria = int.Parse(cbxCategoria.SelectedValue.ToString());
+
             try
             {
 
@@ -32,8 +36,8 @@ namespace CRUD_ComboBox
 
                 if (codigo!=""&& nombre!=""&& descripcion!="" && precio_publico> 0 && existencias>0)
                 {
-            String sql = "INSERT INTO productos (codigo, nombre, descripcion, precio_publico, existencias)" +
-                "VALUES ('"+codigo+ "','" + nombre + "','" + descripcion + "','" + precio_publico + "','" + existencias + "')";
+            String sql = "INSERT INTO productos (codigo, nombre, descripcion, precio_publico, existencias, idCategoria)" +
+                "VALUES ('"+codigo+ "','" + nombre + "','" + descripcion + "','" + precio_publico + "','" + existencias + "','"+idCategoria+"')";
 
             MySqlConnection conexionBD = Conexion.conexion();
             conexionBD.Open();
@@ -73,7 +77,7 @@ namespace CRUD_ComboBox
 
             MySqlDataReader reader = null;
 
-            String sql = "SELECT id, codigo, nombre, descripcion, precio_publico, existencias FROM productos WHERE codigo LIKE '"+ codigo +"' LIMIT 1";
+            String sql = "SELECT id, codigo, nombre, descripcion, precio_publico, existencias, idCategoria FROM productos WHERE codigo LIKE '"+ codigo +"' LIMIT 1";
                 
             MySqlConnection conexionBD = Conexion.conexion();
             conexionBD.Open();
@@ -92,6 +96,7 @@ namespace CRUD_ComboBox
                         txtDescripcion.Text = reader.GetString(3);
                         txtPrecioPublico.Text = reader.GetString(4);
                         txtExistencias.Text = reader.GetString(5);
+                        cbxCategoria.SelectedValue = reader.GetString(6);// trae el producto para visualizar combobox
                     }                                                      
                 }else
                 {
@@ -111,6 +116,9 @@ namespace CRUD_ComboBox
 
         private void BtnActualizar_Click(object sender, EventArgs e)
         {
+            //identificar que selecciona el usuario en el combobox selectedValue trae el valor del id que selecciono
+            int idCategoria = int.Parse(cbxCategoria.SelectedValue.ToString());
+
             String id = txtId.Text;
             String codigo = txtCodigo.Text;
             String nombre = txtNombre.Text;
@@ -123,7 +131,8 @@ namespace CRUD_ComboBox
                 "nombre='" + nombre + "'," +
                 "descripcion='" + descripcion + "'," +
                 "precio_publico='" + precio_publico + "'," +
-                "existencias='" + existencias + "' WHERE id='"+id+"'" ;
+                "existencias='" + existencias + "' ," +
+                " idCategoria='"+idCategoria +"' WHERE id='"+id+"'" ;
 
             MySqlConnection conexionBD = Conexion.conexion();
             conexionBD.Open();
@@ -182,7 +191,6 @@ namespace CRUD_ComboBox
             limpiar();
         }
 
-
         private void limpiar()
         {
             txtId.Text = "";
@@ -194,6 +202,46 @@ namespace CRUD_ComboBox
 
 
         }
+
+
+        private void cargarCategorias()
+        {
+            cbxCategoria.DataSource = null;
+            cbxCategoria.Items.Clear();
+            string sql = "SELECT id, nombre FROM categorias ORDER BY nombre ASC";
+
+            MySqlConnection conexionBD = Conexion.conexion();
+            conexionBD.Open();
+
+            try
+            {
+
+                //llenar tabla en combobox
+                MySqlCommand comando = new MySqlCommand(sql, conexionBD);
+                MySqlDataAdapter data = new MySqlDataAdapter(comando);
+
+                DataTable dt = new DataTable();
+                data.Fill(dt);
+
+                cbxCategoria.ValueMember = "id";
+                cbxCategoria.DisplayMember = "nombre";
+                cbxCategoria.DataSource = dt;
+
+            }catch(MySqlException ex)
+            {
+                MessageBox.Show("error al cargar: " + ex.Message);
+            }
+            finally
+            {
+                conexionBD.Close();
+            }
+
+
+
+        }
+        
+
+
     }
 
 }
